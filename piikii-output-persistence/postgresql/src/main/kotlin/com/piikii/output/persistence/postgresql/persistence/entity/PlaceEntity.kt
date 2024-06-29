@@ -3,7 +3,7 @@ package com.piikii.output.persistence.postgresql.persistence.entity
 import com.piikii.application.domain.generic.Source
 import com.piikii.application.domain.generic.ThumbnailLinks
 import com.piikii.application.domain.place.Place
-import com.piikii.application.domain.schedule.PlaceType
+import com.piikii.application.domain.schedule.Schedule
 import com.piikii.output.persistence.postgresql.persistence.common.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -27,6 +27,8 @@ class PlaceEntity(
     var url: String?,
     @Column(name = "thumbnail_links", nullable = false, length = 255)
     var thumbnailLinks: String,
+    @Column(name = "name", nullable = false)
+    var name: String,
     @Column(name = "address", length = 255)
     var address: String? = null,
     @Column(name = "phone_number", length = 15)
@@ -35,9 +37,25 @@ class PlaceEntity(
     var starGrade: Float? = null,
     @Enumerated(EnumType.STRING)
     var source: Source,
-    @Enumerated(EnumType.STRING)
-    var placeType: PlaceType,
+    @Column(name = "schedule_id", nullable = false)
+    var scheduleId: Long,
+    @Column(name = "vote_like_count", nullable = false)
+    var voteLikeCount: Int = 0,
 ) : BaseEntity() {
+    fun toDomain(schedule: Schedule?): Place {
+        return Place(
+            id = id,
+            url = url,
+            thumbnailLinks = ThumbnailLinks(thumbnailLinks),
+            address = address,
+            phoneNumber = phoneNumber,
+            starGrade = starGrade,
+            source = source,
+            name = name,
+            schedule = schedule,
+        )
+    }
+
     fun toDomain(): Place {
         return Place(
             id = id,
@@ -47,7 +65,8 @@ class PlaceEntity(
             phoneNumber = phoneNumber,
             starGrade = starGrade,
             source = source,
-            placeType = placeType,
+            name = name,
+            schedule = null,
         )
     }
 
@@ -58,7 +77,7 @@ class PlaceEntity(
         phoneNumber = place.phoneNumber
         starGrade = place.starGrade
         source = place.source
-        placeType = place.placeType
+        scheduleId = place.schedule!!.id!!
     }
 
     companion object {
@@ -74,7 +93,8 @@ class PlaceEntity(
                 phoneNumber = place.phoneNumber,
                 starGrade = place.starGrade,
                 source = place.source,
-                placeType = place.placeType,
+                name = place.name,
+                scheduleId = place.schedule!!.id!!,
             )
         }
     }
